@@ -24,6 +24,15 @@ function App() {
   const onClickBtn = () => {
     setItems(prevState => [...prevState, {uah, course, usd, id: nanoid()}])
   }
+  const onClickRemoveBtn = (id) => {
+    setItems(prevState => {
+      const index = prevState.findIndex(it => it.id === id);
+      if (index !== -1) {
+        prevState.splice(index, 1)
+      }
+      return [...prevState];
+    })
+  }
 
   return (
     <div className='container'>
@@ -52,6 +61,7 @@ function App() {
       </form>
       <OperationList
           items={items}
+          onClickRemoveBtn={onClickRemoveBtn}
       />
     </div>
   );
