@@ -3,6 +3,7 @@ import {useEffect, useState} from "react";
 import MyButton from "./components/button/MyButton";
 import OperationList from "./components/list/OperationList";
 import {nanoid} from "nanoid";
+import Output from "./components/output/Output";
 
 function App() {
   const [uah, setUah] = useState(0);
@@ -44,13 +45,8 @@ function App() {
               type: 'text',
             }}
         />
-        <MyInput
-            label={'USD'}
-            inputProps={{
-              value: usd,
-              onChange: onChangeCourse,
-              type: 'text',
-            }}
+        <Output
+            usd={usd}
         />
         <MyButton onClick={onClickBtn} type="button">Add operation</MyButton>
       </form>

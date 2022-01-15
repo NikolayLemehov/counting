@@ -1,0 +1,15 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  padding: 5px;
+  font-size: 20px;
+}
+
+.lead {
+
+}
+
+.data {
+
+}
