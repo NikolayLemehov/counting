@@ -1,39 +1,62 @@
-import './App.css';
 import MyInput from "./components/input/MyInput";
-import {useState} from "react";
+import {useEffect, useState} from "react";
+import MyButton from "./components/button/MyButton";
+import OperationList from "./components/list/OperationList";
+import {nanoid} from "nanoid";
 
 function App() {
-  const [grn, setGrn] = useState(0);
+  const [uah, setUah] = useState(0);
   const [course, setCourse] = useState(30);
-  const onChangeGrn = (e) => {
-    setGrn(e.target.value);
+  const [usd, setUsd] = useState(() => (uah / course));
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    setUsd(uah / course)
+  }, [uah, course])
+
+  const onChangeUah = (e) => {
+    setUah(e.target.value);
   }
   const onChangeCourse = (e) => {
     setCourse(e.target.value);
   }
+  const onClickBtn = () => {
+    setItems(prevState => [...prevState, {uah, course, usd, id: nanoid()}])
+  }
+
   return (
-    <div className="App container">
+    <div className='container'>
       <h1>Counting</h1>
       <form>
         <MyInput
-            value={grn}
-            onChange={onChangeGrn}
-            type="text"
-            label={{text: 'Гривна'}}
+            label={'UAH'}
+            inputProps={{
+              value: uah,
+              onChange: onChangeUah,
+              type: 'text',
+            }}
         />
         <MyInput
-            value={course}
-            onChange={onChangeCourse}
-            type="text"
-            label={{text: 'Курс'}}
+            label={'Course'}
+            inputProps={{
+              value: course,
+              onChange: onChangeCourse,
+              type: 'text',
+            }}
         />
         <MyInput
-            value={grn / course}
-            type="text"
-            readOnly
-            label={{text: 'Доллары'}}
+            label={'USD'}
+            inputProps={{
+              value: usd,
+              onChange: onChangeCourse,
+              type: 'text',
+            }}
         />
+        <MyButton onClick={onClickBtn} type="button">Add operation</MyButton>
       </form>
+      <OperationList
+          items={items}
+      />
     </div>
   );
 }
