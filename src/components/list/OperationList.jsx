@@ -1,5 +1,7 @@
 import React from 'react';
 import MyButton from "../button/MyButton";
+import {formatDate} from "../../utils";
+import classes from "./OperationList.module.css";
 
 const OperationList = ({items, onClickRemoveBtn}) => {
   return (
@@ -11,19 +13,21 @@ const OperationList = ({items, onClickRemoveBtn}) => {
         <table>
           <thead>
           <tr>
-            <th>grn</th>
-            <th>course</th>
-            <th>usd</th>
-            <th>remove btn</th>
+            <th className={classes.cell}>grn</th>
+            <th className={classes.cell}>course</th>
+            <th className={classes.cell}>usd</th>
+            <th className={classes.cell}>date</th>
+            <th className={classes.cell}>remove btn</th>
           </tr>
           </thead>
           <tbody>
           {items.map(it => (
               <tr key={it.id}>
-                <td>{it.uah}</td>
-                <td>{it.course}</td>
-                <td>{it.usd.toFixed(2)}</td>
-                <td>
+                <td className={classes.cell}>{it.uah}</td>
+                <td className={classes.cell}>{it.course}</td>
+                <td className={classes.cell}>{it.usd.toFixed(2)}</td>
+                <td className={classes.cell}>{formatDate(it.date)}</td>
+                <td className={classes.cell}>
                   <MyButton
                       onClick={() => onClickRemoveBtn(it.id)}
                   >x</MyButton>

@@ -4,7 +4,7 @@ import classes from "./Output.module.css";
 const Output = ({usd}) => {
   return (
       <div className={classes.wrapper}>
-        <div>Usd</div>
+        <div>USD</div>
         <div>{usd}</div>
       </div>
   );

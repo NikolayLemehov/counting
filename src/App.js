@@ -4,10 +4,12 @@ import MyButton from "./components/button/MyButton";
 import OperationList from "./components/list/OperationList";
 import {nanoid} from "nanoid";
 import Output from "./components/output/Output";
+import {formatDate} from "./utils";
 
 function App() {
   const [uah, setUah] = useState(0);
   const [course, setCourse] = useState(30);
+  const [date, setDate] = useState(new Date());
   const [usd, setUsd] = useState(() => (uah / course));
   const [items, setItems] = useState([]);
 
@@ -21,8 +23,11 @@ function App() {
   const onChangeCourse = (e) => {
     setCourse(e.target.value);
   }
+  const onChangeDate = (e) => {
+    setDate(new Date(e.target.value));
+  }
   const onClickBtn = () => {
-    setItems(prevState => [...prevState, {uah, course, usd, id: nanoid()}])
+    setItems(prevState => [...prevState, {uah, course, usd, date, id: nanoid()}])
   }
   const onClickRemoveBtn = (id) => {
     setItems(prevState => {
@@ -57,8 +62,15 @@ function App() {
             inputProps={{
               value: course,
               onChange: onChangeCourse,
-              onKeyPress,
               type: 'text',
+            }}
+        />
+        <MyInput
+            label={'Date'}
+            inputProps={{
+              value: formatDate(date),
+              onChange: onChangeDate,
+              type: 'date',
             }}
         />
         <Output
