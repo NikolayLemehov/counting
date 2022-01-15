@@ -55,7 +55,7 @@ function App() {
             }}
         />
         <Output
-            usd={usd}
+            usd={usd.toFixed(2)}
         />
         <MyButton onClick={onClickBtn} type="button">Add operation</MyButton>
       </form>

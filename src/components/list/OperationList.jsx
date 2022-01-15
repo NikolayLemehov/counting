@@ -4,6 +4,10 @@ import MyButton from "../button/MyButton";
 const OperationList = ({items, onClickRemoveBtn}) => {
   return (
       <div>
+        <div>Balance USD: {items.reduce((acc, it) => {
+          acc += it.usd;
+          return acc;
+        }, 0).toFixed(2)}</div>
         <table>
           <thead>
           <tr>
@@ -18,7 +22,7 @@ const OperationList = ({items, onClickRemoveBtn}) => {
               <tr key={it.id}>
                 <td>{it.uah}</td>
                 <td>{it.course}</td>
-                <td>{it.usd}</td>
+                <td>{it.usd.toFixed(2)}</td>
                 <td>
                   <MyButton
                       onClick={() => onClickRemoveBtn(it.id)}
