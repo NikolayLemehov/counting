@@ -33,6 +33,11 @@ function App() {
       return [...prevState];
     })
   }
+  const onKeyPress = (evt) => {
+    if (evt.key === 'Enter') {
+      onClickBtn();
+    }
+  }
 
   return (
     <div className='container'>
@@ -43,6 +48,7 @@ function App() {
             inputProps={{
               value: uah,
               onChange: onChangeUah,
+              onKeyPress,
               type: 'text',
             }}
         />
@@ -51,6 +57,7 @@ function App() {
             inputProps={{
               value: course,
               onChange: onChangeCourse,
+              onKeyPress,
               type: 'text',
             }}
         />
