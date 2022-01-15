@@ -29,7 +29,7 @@ const OperationList = ({items, onClickRemoveBtn}) => {
                   >x</MyButton>
                 </td>
               </tr>
-          ))}
+          )).reverse()}
           </tbody>
         </table>
       </div>
