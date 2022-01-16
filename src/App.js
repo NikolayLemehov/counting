@@ -5,6 +5,7 @@ import OperationList from "./components/list/OperationList";
 import {nanoid} from "nanoid";
 import Output from "./components/output/Output";
 import {formatDate} from "./utils";
+import classes from "./App.module.css";
 
 function App() {
   const [uah, setUah] = useState(0);
@@ -12,6 +13,7 @@ function App() {
   const [date, setDate] = useState(new Date());
   const [usd, setUsd] = useState(() => (uah / course));
   const [items, setItems] = useState([]);
+  const [authCourse, setAuthCourse] = useState(true);
 
   useEffect(() => {
     setUsd(uah / course)
@@ -57,14 +59,24 @@ function App() {
               type: 'text',
             }}
         />
-        <MyInput
-            label={'Course'}
-            inputProps={{
-              value: course,
-              onChange: onChangeCourse,
-              type: 'text',
-            }}
-        />
+        <div className={classes.hWrapper}>
+          <MyInput
+              label={'Course'}
+              inputProps={{
+                value: course,
+                onChange: onChangeCourse,
+                type: 'text',
+              }}
+          />
+          <MyInput
+              label={'Automatic course'}
+              inputProps={{
+                onChange: ({target}) => setAuthCourse(!target.checked),
+                defaultChecked: authCourse,
+                type: 'checkbox',
+              }}
+          />
+        </div>
         <MyInput
             label={'Date'}
             inputProps={{
