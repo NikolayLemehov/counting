@@ -10,7 +10,7 @@ import axios from "axios";
 import {useDebounce} from "./hooks/useDebounce";
 
 const url = process.env.REACT_APP_NBU_COURSE
-const DATE_DELAY = 1000;
+const NBU_DELAY = 1000;
 function App() {
   const [uah, setUah] = useState(0);
   const [course, setCourse] = useState(30);
@@ -19,7 +19,8 @@ function App() {
   const [items, setItems] = useState([]);
   const [authCourse, setAuthCourse] = useState(true);
 
-  const debouncedDate = useDebounce(date, DATE_DELAY)
+  const debouncedDate = useDebounce(date, NBU_DELAY)
+  const debouncedAuthCourse = useDebounce(authCourse, NBU_DELAY)
   useEffect(() => {
     setUsd(uah / course)
   }, [uah, course])
@@ -51,7 +52,7 @@ function App() {
     }
   }
   const fetchCourse = async () => {
-    if (!authCourse) {
+    if (!debouncedAuthCourse) {
       return;
     }
     const res = await axios.get(`${url}?valcode=USD&date=${formatDate(debouncedDate)}&json`)
@@ -61,7 +62,7 @@ function App() {
   }
   useEffect(() => {
     fetchCourse();
-  }, [debouncedDate, authCourse]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [debouncedDate, debouncedAuthCourse]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className='container'>
@@ -84,14 +85,14 @@ function App() {
                 type: 'text',
                 value: course,
                 onChange: onChangeCourse,
-                readOnly: authCourse,
+                readOnly: debouncedAuthCourse,
               }}
           />
           <MyInput
               label={'Automatic course'}
               inputProps={{
                 type: 'checkbox',
-                defaultChecked: authCourse,
+                defaultChecked: debouncedAuthCourse,
                 onChange: ({target}) => setAuthCourse(target.checked),
               }}
           />
