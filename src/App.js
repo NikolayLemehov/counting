@@ -6,7 +6,11 @@ import {nanoid} from "nanoid";
 import Output from "./components/output/Output";
 import {formatDate} from "./utils";
 import classes from "./App.module.css";
+import axios from "axios";
+import {useDebounce} from "./hooks/useDebounce";
 
+const url = process.env.REACT_APP_NBU_COURSE
+const DATE_DELAY = 1000;
 function App() {
   const [uah, setUah] = useState(0);
   const [course, setCourse] = useState(30);
@@ -15,6 +19,7 @@ function App() {
   const [items, setItems] = useState([]);
   const [authCourse, setAuthCourse] = useState(true);
 
+  const debouncedDate = useDebounce(date, DATE_DELAY)
   useEffect(() => {
     setUsd(uah / course)
   }, [uah, course])
@@ -45,6 +50,16 @@ function App() {
       onClickBtn();
     }
   }
+  const fetchCourse = async () => {
+    const res = await axios.get(`${url}?valcode=USD&date=${formatDate(debouncedDate)}&json`)
+    if (res.status === 200) {
+      setCourse(res.data[0].rate)
+      console.log(res.data[0])
+    }
+  }
+  useEffect(() => {
+    fetchCourse();
+  }, [debouncedDate]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className='container'>
@@ -53,10 +68,10 @@ function App() {
         <MyInput
             label={'UAH'}
             inputProps={{
+              type: 'text',
               value: uah,
               onChange: onChangeUah,
               onKeyPress,
-              type: 'text',
             }}
         />
 
@@ -64,21 +79,18 @@ function App() {
           <MyInput
               label={'Course'}
               inputProps={{
-                value: course,
-                readOnly: authCourse,
-                onChange: onChangeCourse,
                 type: 'text',
+                value: course,
+                onChange: onChangeCourse,
+                readOnly: authCourse,
               }}
           />
           <MyInput
               label={'Automatic course'}
               inputProps={{
-                onChange: ({target}) => {
-                  console.log(target.checked)
-                  setAuthCourse(target.checked)
-                },
-                defaultChecked: authCourse,
                 type: 'checkbox',
+                defaultChecked: authCourse,
+                onChange: ({target}) => setAuthCourse(target.checked),
               }}
           />
         </div>
@@ -86,7 +98,7 @@ function App() {
         <MyInput
             label={'Date'}
             inputProps={{
-              value: formatDate(date),
+              value: formatDate(date, '-'),
               onChange: onChangeDate,
               type: 'date',
             }}

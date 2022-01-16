@@ -26,7 +26,7 @@ const OperationList = ({items, onClickRemoveBtn}) => {
                 <td className={classes.cell}>{it.uah}</td>
                 <td className={classes.cell}>{it.course}</td>
                 <td className={classes.cell}>{it.usd.toFixed(2)}</td>
-                <td className={classes.cell}>{formatDate(it.date)}</td>
+                <td className={classes.cell}>{formatDate(it.date, '-')}</td>
                 <td className={classes.cell}>
                   <MyButton
                       onClick={() => onClickRemoveBtn(it.id)}
