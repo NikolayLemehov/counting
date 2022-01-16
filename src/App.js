@@ -51,6 +51,9 @@ function App() {
     }
   }
   const fetchCourse = async () => {
+    if (!authCourse) {
+      return;
+    }
     const res = await axios.get(`${url}?valcode=USD&date=${formatDate(debouncedDate)}&json`)
     if (res.status === 200) {
       setCourse(res.data[0].rate)
@@ -59,7 +62,7 @@ function App() {
   }
   useEffect(() => {
     fetchCourse();
-  }, [debouncedDate]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [debouncedDate, authCourse]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className='container'>
