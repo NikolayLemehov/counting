@@ -12,3 +12,7 @@
     max-width: 300px;
     font-size: inherit;
 }
+
+.myInput[readonly] {
+    opacity: 0.5;
+}

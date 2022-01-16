@@ -59,11 +59,13 @@ function App() {
               type: 'text',
             }}
         />
+
         <div className={classes.hWrapper}>
           <MyInput
               label={'Course'}
               inputProps={{
                 value: course,
+                readOnly: authCourse,
                 onChange: onChangeCourse,
                 type: 'text',
               }}
@@ -71,12 +73,16 @@ function App() {
           <MyInput
               label={'Automatic course'}
               inputProps={{
-                onChange: ({target}) => setAuthCourse(!target.checked),
+                onChange: ({target}) => {
+                  console.log(target.checked)
+                  setAuthCourse(target.checked)
+                },
                 defaultChecked: authCourse,
                 type: 'checkbox',
               }}
           />
         </div>
+
         <MyInput
             label={'Date'}
             inputProps={{
