@@ -57,7 +57,6 @@ function App() {
     const res = await axios.get(`${url}?valcode=USD&date=${formatDate(debouncedDate)}&json`)
     if (res.status === 200) {
       setCourse(res.data[0].rate)
-      console.log(res.data[0])
     }
   }
   useEffect(() => {
