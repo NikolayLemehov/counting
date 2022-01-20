@@ -9,24 +9,37 @@ import classes from "./App.module.css";
 import axios from "axios";
 import {useDebounce} from "./hooks/useDebounce";
 
+const NameInput = {
+  UAH: 'uah',
+}
+// new RegExp(/^\d*(?:[.,]\d*)?$/).test(e.target.value)
 const url = process.env.REACT_APP_NBU_COURSE
 const NBU_DELAY = 1000;
+
 function App() {
   const [uah, setUah] = useState(0);
+  const [uahDirty, setUahDirty] = useState(false);
+  const [uahError, setUahError] = useState('');
   const [course, setCourse] = useState(30);
   const [date, setDate] = useState(new Date());
-  const [usd, setUsd] = useState(() => (uah / course));
-  const [items, setItems] = useState([]);
+  const [usd, setUsd] = useState(() => (+uah / course));
   const [authCourse, setAuthCourse] = useState(true);
+
+  const [items, setItems] = useState([]);
 
   const debouncedDate = useDebounce(date, NBU_DELAY)
   const debouncedAuthCourse = useDebounce(authCourse, NBU_DELAY)
   useEffect(() => {
-    setUsd(uah / course)
+    setUsd(+uah / course)
   }, [uah, course])
 
   const onChangeUah = (e) => {
     setUah(e.target.value);
+    if (e.target.value === '') {
+      setUahError('Ошибка')
+    } else {
+      setUahError('')
+    }
   }
   const onChangeCourse = (e) => {
     setCourse(e.target.value);
@@ -34,7 +47,8 @@ function App() {
   const onChangeDate = (e) => {
     setDate(new Date(e.target.value));
   }
-  const onClickBtn = () => {
+
+  const onClickSubmitBtn = () => {
     setItems(prevState => [...prevState, {uah, course, usd, date, id: nanoid()}])
   }
   const onClickRemoveBtn = (id) => {
@@ -46,10 +60,13 @@ function App() {
       return [...prevState];
     })
   }
-  const onKeyPress = (evt) => {
-    if (evt.key === 'Enter') {
-      onClickBtn();
+  const onKeyPressInput = (evt) => {
+    if (evt.key !== 'Enter') return
+
+    if(evt.target.name === NameInput.UAH) {
+      setUahDirty(true)
     }
+    setItems(prevState => [...prevState, {uah, course, usd, date, id: nanoid()}])
   }
   const fetchCourse = async () => {
     if (!debouncedAuthCourse) {
@@ -66,56 +83,58 @@ function App() {
 
   return (
     <div className='container'>
-      <h1>Counting</h1>
-      <form>
-        <MyInput
-            label={'UAH'}
-            inputProps={{
-              type: 'text',
-              value: uah,
-              onChange: onChangeUah,
-              onKeyPress,
-            }}
-        />
-
-        <div className={classes.hWrapper}>
+        <h1>Counting</h1>
+        <form>
           <MyInput
-              label={'Course'}
+              label={'UAH'}
               inputProps={{
                 type: 'text',
-                value: course,
-                onChange: onChangeCourse,
-                readOnly: debouncedAuthCourse,
+                name: NameInput.UAH,
+                value: uah,
+                onChange: onChangeUah,
+                onKeyPress: onKeyPressInput,
               }}
           />
-          <MyInput
-              label={'Automatic course'}
-              inputProps={{
-                type: 'checkbox',
-                defaultChecked: debouncedAuthCourse,
-                onChange: ({target}) => setAuthCourse(target.checked),
-              }}
-          />
-        </div>
+          {(uahError && uahDirty) && <div style={{color: "red"}}>{uahError}</div>}
 
-        <MyInput
-            label={'Date'}
-            inputProps={{
-              value: formatDate(date, '-'),
-              onChange: onChangeDate,
-              type: 'date',
-            }}
+          <div className={classes.hWrapper}>
+            <MyInput
+                label={'Course'}
+                inputProps={{
+                  type: 'text',
+                  value: course,
+                  onChange: onChangeCourse,
+                  readOnly: debouncedAuthCourse,
+                }}
+            />
+            <MyInput
+                label={'Automatic course'}
+                inputProps={{
+                  type: 'checkbox',
+                  defaultChecked: debouncedAuthCourse,
+                  onChange: ({target}) => setAuthCourse(target.checked),
+                }}
+            />
+          </div>
+
+          <MyInput
+              label={'Date'}
+              inputProps={{
+                value: formatDate(date, '-'),
+                onChange: onChangeDate,
+                type: 'date',
+              }}
+          />
+          <Output
+              usd={usd.toFixed(2)}
+          />
+          <MyButton onClick={onClickSubmitBtn} type="button">Add operation</MyButton>
+        </form>
+        <OperationList
+            items={items}
+            onClickRemoveBtn={onClickRemoveBtn}
         />
-        <Output
-            usd={usd.toFixed(2)}
-        />
-        <MyButton onClick={onClickBtn} type="button">Add operation</MyButton>
-      </form>
-      <OperationList
-          items={items}
-          onClickRemoveBtn={onClickRemoveBtn}
-      />
-    </div>
+      </div>
   );
 }
 
