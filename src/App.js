@@ -49,7 +49,10 @@ function App() {
   }
 
   const onClickSubmitBtn = () => {
-    setItems(prevState => [...prevState, {uah, course, usd, date, id: nanoid()}])
+    console.log(uahError)
+    if (!uahError) {
+      setItems(prevState => [...prevState, {uah, course, usd, date, id: nanoid()}])
+    }
   }
   const onClickRemoveBtn = (id) => {
     setItems(prevState => {
@@ -66,7 +69,7 @@ function App() {
     if(evt.target.name === NameInput.UAH) {
       setUahDirty(true)
     }
-    setItems(prevState => [...prevState, {uah, course, usd, date, id: nanoid()}])
+    onClickSubmitBtn()
   }
   const fetchCourse = async () => {
     if (!debouncedAuthCourse) {
