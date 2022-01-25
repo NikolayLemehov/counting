@@ -5,53 +5,69 @@ import OperationList from "./components/list/OperationList";
 import {nanoid} from "nanoid";
 import Output from "./components/output/Output";
 import {formatDate} from "./utils";
-import classes from "./App.module.css";
-import axios from "axios";
+// import classes from "./App.module.css";
 import {useDebounce} from "./hooks/useDebounce";
+import useFetchCourse from "./hooks/useFetchCourse";
+import {useForm} from "./hooks/useForm";
 
 const NameInput = {
   UAH: 'uah',
 }
-// new RegExp(/^\d*(?:[.,]\d*)?$/).test(e.target.value)
-const url = process.env.REACT_APP_NBU_COURSE
 const NBU_DELAY = 1000;
+const byId = ['uah', 'date', 'courseAuto', 'course']
+const byHash = {
+  uah: {
+    type: 'text',
+    label: 'UAH',
+    value: '0',
+  },
+  date: {
+    type: 'date',
+    label: 'Дата',
+    value: formatDate(new Date(), '-'),
+  },
+  courseAuto: {
+    type: 'checkbox',
+    label: 'Automatic course',
+    value: true,
+  },
+  course: {
+    type: 'text',
+    label: 'Course',
+    value: '30',
+  },
+}
 
 function App() {
-  const [uah, setUah] = useState(0);
+  const [byHashValues, onFieldChange, getSubmitData, setByHashValues] = useForm(byHash, byId)
   const [uahDirty, setUahDirty] = useState(false);
   const [uahError, setUahError] = useState('');
-  const [course, setCourse] = useState(30);
-  const [date, setDate] = useState(new Date());
-  const [usd, setUsd] = useState(() => (+uah / course));
-  const [authCourse, setAuthCourse] = useState(true);
 
   const [items, setItems] = useState([]);
 
-  const debouncedDate = useDebounce(date, NBU_DELAY)
-  const debouncedAuthCourse = useDebounce(authCourse, NBU_DELAY)
-  useEffect(() => {
-    setUsd(+uah / course)
-  }, [uah, course])
+  const debouncedDate = useDebounce(byHashValues.date.value, NBU_DELAY)
+  const debouncedAuthCourse = useDebounce(byHashValues.courseAuto.value, NBU_DELAY)
 
-  const onChangeUah = (e) => {
-    setUah(e.target.value);
-    if (e.target.value === '') {
-      setUahError('Ошибка')
-    } else {
-      setUahError('')
-    }
-  }
-  const onChangeCourse = (e) => {
-    setCourse(e.target.value);
-  }
-  const onChangeDate = (e) => {
-    setDate(new Date(e.target.value));
-  }
+  const [remoteCourse, isLoading] = useFetchCourse(debouncedDate, debouncedAuthCourse)
+  const [usd, setUsd] = useState(() => (+(byHashValues.uah.value) / +(byHashValues.course.value)));
+
+  useEffect(() => {
+    setUsd(+(byHashValues.uah.value) / +(byHashValues.course.value))
+  }, [byHashValues.uah.value, byHashValues.course.value])
+
+  useEffect(() => {
+    setUsd(+(byHashValues.uah.value) / remoteCourse)
+  }, [remoteCourse]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const newByHashValues = {...byHashValues}
+    newByHashValues.course.value = remoteCourse;
+    setByHashValues(newByHashValues)
+  }, [remoteCourse]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const onClickSubmitBtn = () => {
-    console.log(uahError)
     if (!uahError) {
-      setItems(prevState => [...prevState, {uah, course, usd, date, id: nanoid()}])
+      setItems(prevState => [...prevState, {...getSubmitData(), usd, id: nanoid()}])
     }
   }
   const onClickRemoveBtn = (id) => {
@@ -71,67 +87,33 @@ function App() {
     }
     onClickSubmitBtn()
   }
-  const fetchCourse = async () => {
-    if (!debouncedAuthCourse) {
-      return;
-    }
-    const res = await axios.get(`${url}?valcode=USD&date=${formatDate(debouncedDate)}&json`)
-    if (res.status === 200) {
-      setCourse(res.data[0].rate)
-    }
-  }
-  useEffect(() => {
-    fetchCourse();
-  }, [debouncedDate, debouncedAuthCourse]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className='container'>
         <h1>Counting</h1>
         <form>
-          <MyInput
-              label={'UAH'}
-              inputProps={{
-                type: 'text',
-                name: NameInput.UAH,
-                value: uah,
-                onChange: onChangeUah,
-                onKeyPress: onKeyPressInput,
-              }}
-          />
+          {byId.map(id => {
+            return <MyInput
+                key={id}
+                label={byHash[id].label}
+                inputProps={{
+                  type: byHash[id].type,
+                  name: id,
+                  value: byHashValues[id].value,
+                  onChange: onFieldChange,
+                  onKeyPress: onKeyPressInput,
+                  defaultChecked: byHash[id].type === 'checkbox' && byHashValues[id].value,
+                  readOnly: id === 'course' && debouncedAuthCourse,
+                }}
+            />
+          })}
           {(uahError && uahDirty) && <div style={{color: "red"}}>{uahError}</div>}
 
-          <div className={classes.hWrapper}>
-            <MyInput
-                label={'Course'}
-                inputProps={{
-                  type: 'text',
-                  value: course,
-                  onChange: onChangeCourse,
-                  readOnly: debouncedAuthCourse,
-                }}
-            />
-            <MyInput
-                label={'Automatic course'}
-                inputProps={{
-                  type: 'checkbox',
-                  defaultChecked: debouncedAuthCourse,
-                  onChange: ({target}) => setAuthCourse(target.checked),
-                }}
-            />
-          </div>
-
-          <MyInput
-              label={'Date'}
-              inputProps={{
-                value: formatDate(date, '-'),
-                onChange: onChangeDate,
-                type: 'date',
-              }}
-          />
           <Output
               usd={usd.toFixed(2)}
           />
           <MyButton onClick={onClickSubmitBtn} type="button">Add operation</MyButton>
+          {isLoading ? <div>Loading...</div> : <div>online</div>}
         </form>
         <OperationList
             items={items}
